@@ -51,12 +51,11 @@ if pdf_file and firma_img and huella_img:
     current_image = images[pagina_seleccionada]
     img_width, img_height = current_image.size
     
-    # Valores predeterminados calibrados para tu formato de constancia
+    # Valores automáticos calibrados para el formato Promart
     def buscar_coordenadas_automaticas():
         reader_auto = PdfReader(io.BytesIO(pdf_bytes))
         page_auto = reader_auto.pages[pagina_seleccionada]
         
-        # Valores por defecto basados en tu calibración exitosa anterior
         sig_def_x, sig_def_y = int(img_width * 0.23), int(img_height * 0.69)
         hue_def_x, hue_def_y = int(img_width * 0.27), int(img_height * 0.76)
         
@@ -72,13 +71,12 @@ if pdf_file and firma_img and huella_img:
                 
                 texto_lower = text.lower()
                 if "firma" in texto_lower:
-                    # Desplazamiento hacia la derecha de la palabra "Firma" y ligeramente abajo
                     sig_def_x = int(px + 120)
                     sig_def_y = int(py + 45)
                 elif "huella" in texto_lower:
-                    # Desplazamiento hacia el recuadro inferior de huella digital
-                    hue_def_x = int(px + 10)
-                    hue_def_y = int(py + 210)
+                    # Desplazamiento ajustado para que caiga dentro del cuadro inferior
+                    hue_def_x = int(px + 30)
+                    hue_def_y = int(py + 140)
 
         try:
             page_auto.extract_text(visitor_text=visitor_text)
