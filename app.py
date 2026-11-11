@@ -60,10 +60,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas con 0.70 para la posición Y de la firma
+    # Coordenadas calibradas con precisión
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
-        val_sig_y = int(img_height * 0.70)  # Factor actualizado a 0.70
+        val_sig_y = int(img_height * 0.70)  # Firma con su factor exacto validado
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -108,12 +108,12 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS CON PRIMERA LÍNEA LIGERAMENTE BAJADA ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI
-        can.drawString(pdf_w * 0.16, pdf_h * 0.771, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.771, txt_dni)
+        # Línea 1: Nombre y DNI (Bajados un poquito a 0.763 para apoyar perfectamente sobre la línea)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.763, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.763, txt_dni)
         
         # Línea 2: Empresa y Puesto
         can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
