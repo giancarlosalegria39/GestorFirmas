@@ -109,12 +109,10 @@ if pdf_file and firma_img and huella_img:
         overlay_pdf = PdfReader(packet)
         overlay_page = overlay_pdf.pages[0]
         
-        # Fusionar capa con el PDF original usando el método moderno de pypdf
+        # Fusionar capa usando PdfWriter para cumplir con la nueva versión de pypdf
         writer = PdfWriter()
-        for i, page in enumerate(reader_temp.pages):
-            if i == pagina_seleccionada:
-                page.merge_page(overlay_page)
-            writer.add_page(page)
+        writer.append(reader_temp)
+        writer.pages[pagina_seleccionada].merge_page(overlay_page)
             
         output_pdf_bytes = io.BytesIO()
         writer.write(output_pdf_bytes)
