@@ -108,16 +108,16 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS CON CALIBRACIÓN EXACTA EN LÍNEAS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS CON CALIBRACIÓN FINAFINÍSIMA ---
         can.setFont("Helvetica", 10)
         
         # Línea 1: Nombre y DNI
         can.drawString(pdf_w * 0.18, pdf_h * 0.742, txt_nombre)
         can.drawString(pdf_w * 0.74, pdf_h * 0.742, txt_dni)
         
-        # Línea 2: Empresa y Puesto (Alineados perfectamente sobre la línea en blanco)
-        can.drawString(pdf_w * 0.35, pdf_h * 0.713, txt_empresa)
-        can.drawString(pdf_w * 0.70, pdf_h * 0.713, txt_puesto)
+        # Línea 2: Empresa (desplazada a la derecha de la palabra "empresa") y Puesto (desplazado a la derecha de "en el puesto de")
+        can.drawString(pdf_w * 0.38, pdf_h * 0.713, txt_empresa)
+        can.drawString(pdf_w * 0.77, pdf_h * 0.713, txt_puesto)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
