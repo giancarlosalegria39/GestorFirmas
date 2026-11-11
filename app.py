@@ -61,13 +61,13 @@ if pdf_file and firma_img and huella_img:
         
         st.write("**Firma:**")
         sig_x = st.slider("Posición X (Firma)", 0, img_width, int(img_width * 0.4), key="sig_x")
-        sig_y = st.slider("Posición Y (Firma)", 0, img_height, int(img_height * 0.8), key="sig_y")
+        sig_y = st.slider("Posición Y (Firma)", 0, img_height, int(img_height * 0.75), key="sig_y")
         sig_w = st.slider("Ancho Firma", 50, 300, 150, key="sig_w")
         
         st.write("**Huella Digital:**")
-        hue_x = st.slider("Posición X (Huella)", 0, img_width, int(img_width * 0.7), key="hue_x")
+        hue_x = st.slider("Posición X (Huella)", 0, img_width, int(img_width * 0.2), key="hue_x")
         hue_y = st.slider("Posición Y (Huella)", 0, img_height, int(img_height * 0.8), key="hue_y")
-        hue_w = st.slider("Ancho Huella", 30, 200, 70, key="hue_w")
+        hue_w = st.slider("Ancho Huella", 30, 200, 65, key="hue_w")
 
     if st.button("Generar y Estampar PDF", type="primary"):
         reader_temp = PdfReader(io.BytesIO(pdf_bytes))
@@ -86,7 +86,7 @@ if pdf_file and firma_img and huella_img:
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
         r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
         
-        # Mapeo de coordenadas corregido restando la altura para alinear el borde superior
+        # Mapeo de coordenadas robusto
         r_sig_x = sig_x * scale_x
         r_sig_y = pdf_h - (sig_y * scale_y) - r_sig_h
         r_sig_w = sig_w * scale_x
