@@ -9,7 +9,7 @@ import os
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
 st.title("✍️ Aplicación de Firma y Huella Digital para PDFs")
-st.write("Sube tu documento, detecta automáticamente o ajusta la posición de tu firma y huella, y descarga el PDF.")
+st.write("Sube tu documento, aplica la posición automática o ajústala manualmente, y descarga el PDF.")
 
 # Sección lateral: Cargar recursos propios de cada usuario
 st.sidebar.header("1. Tus Credenciales")
@@ -51,43 +51,26 @@ if pdf_file and firma_img and huella_img:
     current_image = images[pagina_seleccionada]
     img_width, img_height = current_image.size
     
-    # Valores automáticos calibrados para el formato Promart
-    def buscar_coordenadas_automaticas():
-        reader_auto = PdfReader(io.BytesIO(pdf_bytes))
-        page_auto = reader_auto.pages[pagina_seleccionada]
-        
-        sig_def_x, sig_def_y = int(img_width * 0.23), int(img_height * 0.69)
-        hue_def_x, hue_def_y = int(img_width * 0.27), int(img_height * 0.76)
-        
-        def visitor_text(text, cm, tm, font_dict, font_size):
-            nonlocal sig_def_x, sig_def_y, hue_def_x, hue_def_y
-            if text.strip():
-                x_pdf, y_pdf = tm[4], tm[5]
-                pdf_w_box = float(page_auto.mediabox.width)
-                pdf_h_box = float(page_auto.mediabox.height)
-                
-                px = (x_pdf / pdf_w_box) * img_width
-                py = img_height - ((y_pdf / pdf_h_box) * img_height)
-                
-                texto_lower = text.lower()
-                if "firma" in texto_lower:
-                    sig_def_x = int(px + 120)
-                    sig_def_y = int(py + 45)
-                elif "huella" in texto_lower:
-                    # Desplazamiento ajustado para que caiga dentro del cuadro inferior
-                    hue_def_x = int(px + 30)
-                    hue_def_y = int(py + 140)
-
-        try:
-            page_auto.extract_text(visitor_text=visitor_text)
-        except Exception:
-            pass
-            
-        return sig_def_x, sig_def_y, hue_def_x, hue_def_y
-
-    auto_detectar = st.checkbox("✨ Detectar automáticamente y ajustar al formato", value=True)
+    # Casilla para activar el posicionamiento automático inteligente para formato Promart
+    auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    auto_sig_x, auto_sig_y, auto_hue_x, auto_hue_y = buscar_coordenadas_automaticas()
+    # Coordenadas exactas calculadas proporcionalmente a la resolución de la página
+    if auto_detectar:
+        val_sig_x = int(img_width * 0.23)
+        val_sig_y = int(img_height * 0.69)
+        val_sig_w = 254
+        
+        val_hue_x = int(img_width * 0.27)
+        val_hue_y = int(img_height * 1.52)  # Coordenada exacta validada para el cuadro inferior
+        val_hue_w = 165
+    else:
+        val_sig_x = 385
+        val_sig_y = 1611
+        val_sig_w = 254
+        
+        val_hue_x = 450
+        val_hue_y = 3568
+        val_hue_w = 165
 
     col1, col2 = st.columns([2, 1])
     
@@ -95,22 +78,17 @@ if pdf_file and firma_img and huella_img:
         st.image(current_image, caption=f"Página {pagina_seleccionada + 1}", use_container_width=True)
         
     with col2:
-        st.info("La aplicación ubicará automáticamente los elementos en los espacios del documento.")
+        st.info("Ajusta los valores si es necesario o déjalo en automático.")
         
-        val_sig_x = auto_sig_x if auto_detectar else 385
-        val_sig_y = auto_sig_y if auto_detectar else 1611
-        val_hue_x = auto_hue_x if auto_detectar else 450
-        val_hue_y = auto_hue_y if auto_detectar else 3568
-
         st.write("**Firma:**")
         sig_x = st.slider("Posición X (Firma)", 0, img_width, val_sig_x, key="sig_x")
         sig_y = st.slider("Posición Y (Firma)", 0, img_height * 2, val_sig_y, key="sig_y")
-        sig_w = st.slider("Ancho Firma", 50, 300, 254, key="sig_w")
+        sig_w = st.slider("Ancho Firma", 50, 300, val_sig_w, key="sig_w")
         
         st.write("**Huella Digital:**")
         hue_x = st.slider("Posición X (Huella)", 0, img_width, val_hue_x, key="hue_x")
         hue_y = st.slider("Posición Y (Huella)", 0, img_height * 2, val_hue_y, key="hue_y")
-        hue_w = st.slider("Ancho Huella", 30, 200, 165, key="hue_w")
+        hue_w = st.slider("Ancho Huella", 30, 200, val_hue_w, key="hue_w")
 
     if st.button("Generar y Estampar PDF", type="primary"):
         reader_temp = PdfReader(io.BytesIO(pdf_bytes))
