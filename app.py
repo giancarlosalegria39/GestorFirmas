@@ -8,13 +8,19 @@ import os
 
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
-st.title("✍️ Aplicación de Firma y Huella Digital para PDFs")
-st.write("Sube tu documento, aplica la posición automática o ajústala manualmente, y descarga el PDF.")
+st.title("✍️ Aplicación de Firma, Huella y Llenado de Datos para PDFs")
+st.write("Completa tus datos, sube tu documento, y descarga tu constancia firmada y rellenada automáticamente.")
 
-# Sección lateral: Cargar recursos propios de cada usuario
+# Sección lateral: Cargar Credenciales y Datos Personales
 st.sidebar.header("1. Tus Credenciales")
 firma_file = st.sidebar.file_uploader("Sube tu Firma (PNG transparente)", type=["png", "jpg", "jpeg"])
 huella_file = st.sidebar.file_uploader("Sube tu Huella Digital (PNG transparente)", type=["png", "jpg", "jpeg"])
+
+st.sidebar.header("2. Datos del Trabajador")
+txt_nombre = st.sidebar.text_input("Nombre Completo", placeholder="Ej. Juan Pérez")
+txt_dni = st.sidebar.text_input("DNI", placeholder="Ej. 74859612")
+txt_empresa = st.sidebar.text_input("Empresa", value="HOMECENTERS PERUANOS S.A.")
+txt_puesto = st.sidebar.text_input("Puesto", placeholder="Ej. Asistente de Ventas")
 
 firma_img = None
 huella_img = None
@@ -32,8 +38,8 @@ else:
     st.sidebar.warning("⚠️ Sube tu huella para continuar.")
 
 # Sección principal: Cargar PDF
-st.header("2. Sube el Documento a Firmar")
-pdf_file = st.file_uploader("Sube el archivo PDF (ej. Constancia o formulario)", type=["pdf"])
+st.header("3. Sube el Documento a Rellenar y Firmar")
+pdf_file = st.file_uploader("Sube el archivo PDF de la Constancia", type=["pdf"])
 
 if pdf_file and firma_img and huella_img:
     pdf_bytes = pdf_file.read()
@@ -45,8 +51,8 @@ if pdf_file and firma_img and huella_img:
         st.error("Error al procesar el PDF con Poppler. Verifica la configuración de rutas.")
         st.stop()
         
-    st.subheader("3. Configuración de Posición")
-    pagina_seleccionada = st.selectbox("Selecciona la página a firmar:", range(len(images)), format_func=lambda x: f"Página {x + 1}")
+    st.subheader("4. Previsualización y Posicionamiento")
+    pagina_seleccionada = st.selectbox("Selecciona la página a rellenar:", range(len(images)), format_func=lambda x: f"Página {x + 1}")
     
     current_image = images[pagina_seleccionada]
     img_width, img_height = current_image.size
@@ -54,13 +60,13 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente para formato Promart
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas exactas con el valor X calibrado en 0.27
+    # Coordenadas exactas calibradas
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
         val_sig_y = int(img_height * 0.69)
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.27)  # Ajustado exactamente a 0.27
+        val_hue_x = int(img_width * 0.27)  
         val_hue_y = int(img_height * 1.52)  
         val_hue_w = 165
     else:
@@ -90,7 +96,7 @@ if pdf_file and firma_img and huella_img:
         hue_y = st.slider("Posición Y (Huella)", 0, img_height * 2, val_hue_y, key="hue_y")
         hue_w = st.slider("Ancho Huella", 30, 200, val_hue_w, key="hue_w")
 
-    if st.button("Generar y Estampar PDF", type="primary"):
+    if st.button("Generar, Rellenar y Estampar PDF", type="primary"):
         reader_temp = PdfReader(io.BytesIO(pdf_bytes))
         page_temp = reader_temp.pages[pagina_seleccionada]
         pdf_w = float(page_temp.mediabox.width)
@@ -102,6 +108,19 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
+        # --- ESTAMPAR TEXTOS ESCRITOS ---
+        can.setFont("Helvetica", 10) # Fuente y tamaño del texto a rellenar
+        
+        # Coordenadas calculadas en el PDF real para cada línea de texto del formulario Promart
+        # Línea 1: "Yo, [Nombre], con DNI [DNI]"
+        can.drawString(pdf_w * 0.12, pdf_h * 0.765, txt_nombre)
+        can.drawString(pdf_w * 0.70, pdf_h * 0.765, txt_dni)
+        
+        # Línea 2: "trabajador de la empresa [Empresa], en el puesto de [Puesto]"
+        can.drawString(pdf_w * 0.23, pdf_h * 0.725, txt_empresa)
+        can.drawString(pdf_w * 0.63, pdf_h * 0.725, txt_puesto)
+        
+        # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
         r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
         
@@ -137,11 +156,11 @@ if pdf_file and firma_img and huella_img:
         writer.write(output_pdf_bytes)
         output_pdf_bytes.seek(0)
         
-        st.success("¡Documento firmado con éxito!")
+        st.success("¡Documento rellenado y firmado con éxito!")
         st.download_button(
-            label="📥 Descargar PDF Firmado",
+            label="📥 Descargar PDF Rellenado y Firmado",
             data=output_pdf_bytes,
-            file_name="documento_firmado.pdf",
+            file_name="constancia_completa.pdf",
             mime="application/pdf"
         )
 elif not (firma_img and huella_img):
