@@ -1,54 +1,41 @@
-import os
 import streamlit as st
 from PIL import Image
 from pdf2image import convert_from_bytes
 from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 import io
+import os
 
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
 st.title("✍️ Aplicación de Firma y Huella Digital para PDFs")
 st.write("Sube tu documento, ajusta la posición de tu firma y huella, y descarga el PDF listo para enviar.")
 
-# Crear carpeta assets si no existe
-os.makedirs("assets", exist_ok=True)
-
-# Sección lateral: Cargar recursos fijos (Firma y Huella)
-st.sidebar.header("1. Tus Recursos Guardados")
+# Sección lateral: Cargar recursos propios de cada usuario
+st.sidebar.header("1. Tus Credenciales")
 firma_file = st.sidebar.file_uploader("Sube tu Firma (PNG transparente)", type=["png", "jpg", "jpeg"])
 huella_file = st.sidebar.file_uploader("Sube tu Huella Digital (PNG transparente)", type=["png", "jpg", "jpeg"])
 
+firma_img = None
+huella_img = None
+
 if firma_file:
-    with open("assets/firma.png", "wb") as f:
-        f.write(firma_file.getbuffer())
+    firma_img = Image.open(firma_file)
+    st.sidebar.image(firma_img, caption="Tu Firma Registrada", width=150)
+else:
+    st.sidebar.warning("⚠️ Sube tu firma para continuar.")
 
 if huella_file:
-    with open("assets/huella.png", "wb") as f:
-        f.write(huella_file.getbuffer())
-
-# Rutas de recursos
-firma_path = "assets/firma.png"
-huella_path = "assets/huella.png"
-
-has_firma = os.path.exists(firma_path)
-has_huella = os.path.exists(huella_path)
-
-if has_firma:
-    st.sidebar.image(firma_path, caption="Firma Registrada", width=150)
+    huella_img = Image.open(huella_file)
+    st.sidebar.image(huella_img, caption="Tu Huella Registrada", width=150)
 else:
-    st.sidebar.warning("⚠️ Falta subir tu firma.")
-
-if has_huella:
-    st.sidebar.image(huella_path, caption="Huella Registrada", width=150)
-else:
-    st.sidebar.warning("⚠️ Falta subir tu huella.")
+    st.sidebar.warning("⚠️ Sube tu huella para continuar.")
 
 # Sección principal: Cargar PDF
 st.header("2. Sube el Documento a Firmar")
-pdf_file = st.file_uploader("Sube el archivo PDF (ej. Constancia de trabajo)", type=["pdf"])
+pdf_file = st.file_uploader("Sube el archivo PDF (ej. Constancia o formulario)", type=["pdf"])
 
-if pdf_file and has_firma and has_huella:
+if pdf_file and firma_img and huella_img:
     pdf_bytes = pdf_file.read()
     
     # Convertir PDF a imágenes para previsualización
@@ -104,15 +91,25 @@ if pdf_file and has_firma and has_huella:
         r_hue_y = pdf_h - (hue_y * scale_y)
         r_hue_w = hue_w * scale_x
         
-        can.drawImage(firma_path, r_sig_x, r_sig_y, width=r_sig_w, preserveAspectRatio=True, mask='auto')
-        can.drawImage(huella_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
+        # Guardar temporalmente las imágenes en memoria para ReportLab
+        temp_sig_path = "temp_firma.png"
+        temp_hue_path = "temp_huella.png"
+        firma_img.save(temp_sig_path)
+        huella_img.save(temp_hue_path)
+        
+        can.drawImage(temp_sig_path, r_sig_x, r_sig_y, width=r_sig_w, preserveAspectRatio=True, mask='auto')
+        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
         can.save()
+        
+        # Limpiar archivos temporales en disco
+        if os.path.exists(temp_sig_path): os.remove(temp_sig_path)
+        if os.path.exists(temp_hue_path): os.remove(temp_hue_path)
         
         packet.seek(0)
         overlay_pdf = PdfReader(packet)
         overlay_page = overlay_pdf.pages[0]
         
-        # Fusionar capa con el PDF original
+        # Fusionar capa con el PDF original usando el método moderno de pypdf
         writer = PdfWriter()
         for i, page in enumerate(reader_temp.pages):
             if i == pagina_seleccionada:
@@ -130,7 +127,7 @@ if pdf_file and has_firma and has_huella:
             file_name="documento_firmado.pdf",
             mime="application/pdf"
         )
-elif not (has_firma and has_huella):
-    st.info("👈 Sube primero tu imagen de firma y tu huella digital en la barra lateral.")
+elif not (firma_img and huella_img):
+    st.info("👈 Sube primero tu imagen de firma y tu huella digital en la barra lateral para comenzar.")
 else:
-    st.info("👆 Sube un documento PDF en la sección superior para comenzar.")
+    st.info("👆 Sube un documento PDF en la sección superior para continuar.")
