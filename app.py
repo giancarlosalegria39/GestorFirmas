@@ -60,14 +60,14 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente para formato Promart
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas exactas calibradas para la firma y huella
+    # Coordenadas exactas originales restauradas para la firma y huella
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
         val_sig_y = int(img_height * 0.69)
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.27)  
-        val_hue_y = int(img_height * 1.52)  
+        val_hue_x = int(img_width * 0.27)  # Calibrado exacto en 0.27
+        val_hue_y = int(img_height * 0.85)  # Posición Y correcta dentro del recuadro
         val_hue_w = 165
     else:
         val_sig_x = 385
@@ -75,7 +75,7 @@ if pdf_file and firma_img and huella_img:
         val_sig_w = 254
         
         val_hue_x = 450
-        val_hue_y = 3568
+        val_hue_y = 2000
         val_hue_w = 165
 
     col1, col2 = st.columns([2, 1])
@@ -108,18 +108,18 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS CON CALIBRACIÓN EXACTA BASADA EN TU EJEMPLO ---
+        # --- ESTAMPAR TEXTOS ESCRITOS (COMO EN TU EJEMPLO PERFECTO) ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre (después de "Yo, ") y DNI (después de "con DNI ")
+        # Línea 1: Nombre y DNI
         can.drawString(pdf_w * 0.16, pdf_h * 0.771, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.771, txt_dni)
         
-        # Línea 2: Empresa (después de "trabajador de la empresa ") y Puesto (después de "en el puesto de ")
+        # Línea 2: Empresa y Puesto
         can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
         can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
         
-        # --- ESTAMPAR FIRMA Y HUELLA ---
+        # --- ESTAMPAR FIRMA Y HUELLA (EN SU SITIO CORRECTO) ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
         r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
         
