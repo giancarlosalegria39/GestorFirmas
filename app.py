@@ -5,6 +5,7 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 import io
 import os
+from datetime import datetime
 
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
@@ -16,11 +17,15 @@ st.sidebar.header("1. Tus Credenciales")
 firma_file = st.sidebar.file_uploader("Sube tu Firma (PNG transparente)", type=["png", "jpg", "jpeg"])
 huella_file = st.sidebar.file_uploader("Sube tu Huella Digital (PNG transparente)", type=["png", "jpg", "jpeg"])
 
-st.sidebar.header("2. Datos del Trabajador")
+st.sidebar.header("2. Datos del Trabajador y Documento")
 txt_nombre = st.sidebar.text_input("Nombre Completo", placeholder="Ej. Juan Pérez")
 txt_dni = st.sidebar.text_input("DNI", placeholder="Ej. 74859612")
 txt_empresa = st.sidebar.text_input("Empresa", value="HOMECENTERS PERUANOS S.A.")
 txt_puesto = st.sidebar.text_input("Puesto", placeholder="Ej. Asistente de Ventas")
+
+# Nuevos campos para Fecha y Lugar
+txt_fecha = st.sidebar.text_input("Fecha", value=datetime.now().strftime("%d/%m/%Y"), placeholder="Ej. 25/11/2026")
+txt_lugar = st.sidebar.text_input("Lugar", value="Lima", placeholder="Ej. Lima")
 
 firma_img = None
 huella_img = None
@@ -60,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas con precisión exacta
+    # Coordenadas calibradas con 0.70 fijo para la firma
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
-        val_sig_y = int(img_height * 0.72)  # Ajuste fino para bajar la firma justo a su línea
+        val_sig_y = int(img_height * 0.70)  # Factor exacto 0.70 establecido
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -71,7 +76,7 @@ if pdf_file and firma_img and huella_img:
         val_hue_w = 165
     else:
         val_sig_x = 385
-        val_sig_y = 1650
+        val_sig_y = 1600
         val_sig_w = 254
         
         val_hue_x = 450
@@ -111,13 +116,17 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (Alineados perfectamente sobre la línea)
+        # Línea 1: Nombre y DNI
         can.drawString(pdf_w * 0.16, pdf_h * 0.763, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.763, txt_dni)
         
         # Línea 2: Empresa y Puesto
         can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
         can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
+        
+        # Línea 3: Fecha y Lugar (ajustados para las líneas inferiores del formato)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.655, txt_fecha)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.620, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
