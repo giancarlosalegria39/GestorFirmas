@@ -108,16 +108,16 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS CALIBRADOS EXACTAMENTE SOBRE LAS LÍNEAS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS CON CALIBRACIÓN EXACTA ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (Bajados a 0.752 para encajar en la línea)
-        can.drawString(pdf_w * 0.15, pdf_h * 0.752, txt_nombre)
-        can.drawString(pdf_w * 0.72, pdf_h * 0.752, txt_dni)
+        # Línea 1: Nombre (movido a la derecha para no tocar "Yo,") y DNI
+        can.drawString(pdf_w * 0.19, pdf_h * 0.763, txt_nombre)
+        can.drawString(pdf_w * 0.73, pdf_h * 0.763, txt_dni)
         
-        # Línea 2: Empresa y Puesto (Bajados a 0.708 y ajustados horizontalmente)
-        can.drawString(pdf_w * 0.35, pdf_h * 0.708, txt_empresa)
-        can.drawString(pdf_w * 0.76, pdf_h * 0.708, txt_puesto)
+        # Línea 2: Empresa y Puesto (alineados perfectamente a sus líneas)
+        can.drawString(pdf_w * 0.35, pdf_h * 0.718, txt_empresa)
+        can.drawString(pdf_w * 0.76, pdf_h * 0.718, txt_puesto)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
@@ -165,4 +165,4 @@ if pdf_file and firma_img and huella_img:
 elif not (firma_img and huella_img):
     st.info("👈 Sube primero tu firma y huella digital en la barra lateral para comenzar.")
 else:
-    st.info("👆 Sube un documento PDF en la sección superior para continuar.")
+    st.info("👆 Sube
