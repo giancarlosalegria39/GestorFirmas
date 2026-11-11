@@ -111,4 +111,58 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Lí
+        # Línea 1: Nombre y DNI
+        can.drawString(pdf_w * 0.16, pdf_h * 0.771, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.771, txt_dni)
+        
+        # Línea 2: Empresa y Puesto
+        can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
+        can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
+        
+        # --- ESTAMPAR FIRMA Y HUELLA (EN SU SITIO ORIGINAL EXACTO) ---
+        r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
+        r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
+        
+        r_sig_x = sig_x * scale_x
+        r_sig_y = pdf_h - (sig_y * scale_y) - r_sig_h
+        r_sig_w = sig_w * scale_x
+        
+        r_hue_x = hue_x * scale_x
+        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h
+        r_hue_w = hue_w * scale_x
+        
+        temp_sig_path = "temp_firma.png"
+        temp_hue_path = "temp_huella.png"
+        firma_img.save(temp_sig_path)
+        huella_img.save(temp_hue_path)
+        
+        can.drawImage(temp_sig_path, r_sig_x, r_sig_y, width=r_sig_w, preserveAspectRatio=True, mask='auto')
+        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
+        can.save()
+        
+        if os.path.exists(temp_sig_path): os.remove(temp_sig_path)
+        if os.path.exists(temp_hue_path): os.remove(temp_hue_path)
+        
+        packet.seek(0)
+        overlay_pdf = PdfReader(packet)
+        overlay_page = overlay_pdf.pages[0]
+        
+        writer = PdfWriter()
+        writer.append(reader_temp)
+        writer.pages[pagina_seleccionada].merge_page(overlay_page)
+            
+        output_pdf_bytes = io.BytesIO()
+        writer.write(output_pdf_bytes)
+        output_pdf_bytes.seek(0)
+        
+        st.success("¡Documento rellenado y firmado con éxito!")
+        st.download_button(
+            label="📥 Descargar PDF Rellenado y Firmado",
+            data=output_pdf_bytes,
+            file_name="constancia_completa.pdf",
+            mime="application/pdf"
+        )
+elif not (firma_img and huella_img):
+    st.info("👈 Sube primero tu firma y huella digital en la barra lateral para comenzar.")
+else:
+    st.info("👆 Sube un documento PDF en la sección superior para continuar.")
