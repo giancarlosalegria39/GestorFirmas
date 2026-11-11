@@ -108,17 +108,16 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS ---
-        can.setFont("Helvetica", 10) # Fuente y tamaño del texto a rellenar
+        # --- ESTAMPAR TEXTOS ESCRITOS CON POSICIÓN CALIBRADA SOBRE LAS LÍNEAS ---
+        can.setFont("Helvetica", 10)
         
-        # Coordenadas calculadas en el PDF real para cada línea de texto del formulario Promart
-        # Línea 1: "Yo, [Nombre], con DNI [DNI]"
-        can.drawString(pdf_w * 0.12, pdf_h * 0.765, txt_nombre)
-        can.drawString(pdf_w * 0.70, pdf_h * 0.765, txt_dni)
+        # Línea 1: Nombre y DNI
+        can.drawString(pdf_w * 0.16, pdf_h * 0.753, txt_nombre)
+        can.drawString(pdf_w * 0.73, pdf_h * 0.753, txt_dni)
         
-        # Línea 2: "trabajador de la empresa [Empresa], en el puesto de [Puesto]"
-        can.drawString(pdf_w * 0.23, pdf_h * 0.725, txt_empresa)
-        can.drawString(pdf_w * 0.63, pdf_h * 0.725, txt_puesto)
+        # Línea 2: Empresa y Puesto
+        can.drawString(pdf_w * 0.26, pdf_h * 0.713, txt_empresa)
+        can.drawString(pdf_w * 0.70, pdf_h * 0.713, txt_puesto)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
