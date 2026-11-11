@@ -54,13 +54,13 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente para formato Promart
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas exactas con el valor X calibrado en 0.22
+    # Coordenadas exactas con el valor X calibrado en 0.25
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
         val_sig_y = int(img_height * 0.69)
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.22)  # Ajustado al punto exacto de centrado en el recuadro
+        val_hue_x = int(img_width * 0.25)  # Ajustado al centrado exacto de 0.25
         val_hue_y = int(img_height * 1.52)  
         val_hue_w = 165
     else:
