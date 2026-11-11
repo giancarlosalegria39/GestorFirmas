@@ -60,21 +60,21 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas exactas originales restauradas para la firma y huella
+    # Coordenadas calibradas para firma (bajada a la línea) y huella (centrada en el cuadrado)
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
-        val_sig_y = int(img_height * 0.69)
+        val_sig_y = int(img_height * 0.73)  # Firma bajada para quedar sobre la línea
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.27)  
-        val_hue_y = int(img_height * 1.52)  # Valor original restaurado
+        val_hue_x = int(img_width * 0.32)  # Huella movida a la derecha para centrarla en el cuadrado
+        val_hue_y = int(img_height * 1.52)  
         val_hue_w = 165
     else:
         val_sig_x = 385
-        val_sig_y = 1611
+        val_sig_y = 1700
         val_sig_w = 254
         
-        val_hue_x = 450
+        val_hue_x = 520
         val_hue_y = 3568
         val_hue_w = 165
 
@@ -119,7 +119,7 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
         can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
         
-        # --- ESTAMPAR FIRMA Y HUELLA (EN SU POSICIÓN ORIGINAL) ---
+        # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
         r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
         
