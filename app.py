@@ -51,34 +51,34 @@ if pdf_file and firma_img and huella_img:
     current_image = images[pagina_seleccionada]
     img_width, img_height = current_image.size
     
-    # Función de autocompletado basada en palabras clave del PDF
+    # Valores predeterminados calibrados para tu formato de constancia
     def buscar_coordenadas_automaticas():
         reader_auto = PdfReader(io.BytesIO(pdf_bytes))
         page_auto = reader_auto.pages[pagina_seleccionada]
         
-        sig_def_x, sig_def_y = int(img_width * 0.4), int(img_height * 0.75)
-        hue_def_x, hue_def_y = int(img_width * 0.2), int(img_height * 0.85)
+        # Valores por defecto basados en tu calibración exitosa anterior
+        sig_def_x, sig_def_y = int(img_width * 0.23), int(img_height * 0.69)
+        hue_def_x, hue_def_y = int(img_width * 0.27), int(img_height * 0.76)
         
-        # Extractor de posiciones por palabras clave usando visitor_body
         def visitor_text(text, cm, tm, font_dict, font_size):
             nonlocal sig_def_x, sig_def_y, hue_def_x, hue_def_y
             if text.strip():
-                # Coordenadas devueltas por PDF (origen inferior izquierdo)
                 x_pdf, y_pdf = tm[4], tm[5]
                 pdf_w_box = float(page_auto.mediabox.width)
                 pdf_h_box = float(page_auto.mediabox.height)
                 
-                # Convertir coordenadas PDF a coordenadas de la imagen visual
                 px = (x_pdf / pdf_w_box) * img_width
                 py = img_height - ((y_pdf / pdf_h_box) * img_height)
                 
                 texto_lower = text.lower()
                 if "firma" in texto_lower:
-                    sig_def_x = int(px)
-                    sig_def_y = int(py + 30) # Desplazamiento ligero hacia abajo de la palabra
+                    # Desplazamiento hacia la derecha de la palabra "Firma" y ligeramente abajo
+                    sig_def_x = int(px + 120)
+                    sig_def_y = int(py + 45)
                 elif "huella" in texto_lower:
-                    hue_def_x = int(px)
-                    hue_def_y = int(py + 40)
+                    # Desplazamiento hacia el recuadro inferior de huella digital
+                    hue_def_x = int(px + 10)
+                    hue_def_y = int(py + 210)
 
         try:
             page_auto.extract_text(visitor_text=visitor_text)
@@ -87,8 +87,7 @@ if pdf_file and firma_img and huella_img:
             
         return sig_def_x, sig_def_y, hue_def_x, hue_def_y
 
-    # Botón para activar la detección automática
-    auto_detectar = st.checkbox("✨ Detectar automáticamente por palabras clave ('Firma' / 'Huella')", value=True)
+    auto_detectar = st.checkbox("✨ Detectar automáticamente y ajustar al formato", value=True)
     
     auto_sig_x, auto_sig_y, auto_hue_x, auto_hue_y = buscar_coordenadas_automaticas()
 
@@ -98,13 +97,12 @@ if pdf_file and firma_img and huella_img:
         st.image(current_image, caption=f"Página {pagina_seleccionada + 1}", use_container_width=True)
         
     with col2:
-        st.info("La IA buscará las etiquetas de texto o puedes ajustar los valores manualmente.")
+        st.info("La aplicación ubicará automáticamente los elementos en los espacios del documento.")
         
-        # Asignar valores automáticos o manuales según la casilla
-        val_sig_x = auto_sig_x if auto_detectar else int(img_width * 0.4)
-        val_sig_y = auto_sig_y if auto_detectar else int(img_height * 0.75)
-        val_hue_x = auto_hue_x if auto_detectar else int(img_width * 0.2)
-        val_hue_y = auto_hue_y if auto_detectar else int(img_height * 0.85)
+        val_sig_x = auto_sig_x if auto_detectar else 385
+        val_sig_y = auto_sig_y if auto_detectar else 1611
+        val_hue_x = auto_hue_x if auto_detectar else 450
+        val_hue_y = auto_hue_y if auto_detectar else 3568
 
         st.write("**Firma:**")
         sig_x = st.slider("Posición X (Firma)", 0, img_width, val_sig_x, key="sig_x")
@@ -125,15 +123,12 @@ if pdf_file and firma_img and huella_img:
         packet = io.BytesIO()
         can = canvas.Canvas(packet, pagesize=(pdf_w, pdf_h))
         
-        # Factores de escala entre la imagen mostrada y el PDF real
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # Calcular alturas proporcionales de las imágenes en el PDF real
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
         r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
         
-        # Mapeo de coordenadas robusto
         r_sig_x = sig_x * scale_x
         r_sig_y = pdf_h - (sig_y * scale_y) - r_sig_h
         r_sig_w = sig_w * scale_x
@@ -142,7 +137,6 @@ if pdf_file and firma_img and huella_img:
         r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h
         r_hue_w = hue_w * scale_x
         
-        # Guardar temporalmente las imágenes en memoria para ReportLab
         temp_sig_path = "temp_firma.png"
         temp_hue_path = "temp_huella.png"
         firma_img.save(temp_sig_path)
@@ -152,7 +146,6 @@ if pdf_file and firma_img and huella_img:
         can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
         can.save()
         
-        # Limpiar archivos temporales en disco
         if os.path.exists(temp_sig_path): os.remove(temp_sig_path)
         if os.path.exists(temp_hue_path): os.remove(temp_hue_path)
         
@@ -160,7 +153,6 @@ if pdf_file and firma_img and huella_img:
         overlay_pdf = PdfReader(packet)
         overlay_page = overlay_pdf.pages[0]
         
-        # Fusionar capa usando PdfWriter
         writer = PdfWriter()
         writer.append(reader_temp)
         writer.pages[pagina_seleccionada].merge_page(overlay_page)
