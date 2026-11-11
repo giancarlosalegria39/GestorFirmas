@@ -82,13 +82,17 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # Mapeo de coordenadas (invirtiendo el eje Y de pantalla a PDF)
+        # Calcular alturas proporcionales de las imágenes en el PDF real
+        r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
+        r_hue_h = hue_w * scale_x * (huella_img.height / huella_img.width)
+        
+        # Mapeo de coordenadas corregido restando la altura para alinear el borde superior
         r_sig_x = sig_x * scale_x
-        r_sig_y = pdf_h - (sig_y * scale_y)
+        r_sig_y = pdf_h - (sig_y * scale_y) - r_sig_h
         r_sig_w = sig_w * scale_x
         
         r_hue_x = hue_x * scale_x
-        r_hue_y = pdf_h - (hue_y * scale_y)
+        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h
         r_hue_w = hue_w * scale_x
         
         # Guardar temporalmente las imágenes en memoria para ReportLab
@@ -109,7 +113,7 @@ if pdf_file and firma_img and huella_img:
         overlay_pdf = PdfReader(packet)
         overlay_page = overlay_pdf.pages[0]
         
-        # Fusionar capa usando PdfWriter para cumplir con la nueva versión de pypdf
+        # Fusionar capa usando PdfWriter
         writer = PdfWriter()
         writer.append(reader_temp)
         writer.pages[pagina_seleccionada].merge_page(overlay_page)
