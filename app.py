@@ -65,15 +65,15 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas con la firma en Y: 0.70, X: 0.21
+    # Coordenadas calibradas
     if auto_detectar:
         val_sig_x = int(img_width * 0.21)  
         val_sig_y = int(img_height * 0.70)  
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.27)  
-        val_hue_y = int(img_height * 1.52)  
-        val_hue_w = 165
+        val_hue_x = int(img_width * 0.28)  
+        val_hue_y = int(img_height * 0.84)  # Posición corregida para el recuadro de huella
+        val_hue_w = 110
     else:
         val_sig_x = 350
         val_sig_y = 1500
@@ -81,7 +81,7 @@ if pdf_file and firma_img and huella_img:
         
         val_hue_x = 450
         val_hue_y = 3568
-        val_hue_w = 165
+        val_hue_w = 110
 
     col1, col2 = st.columns([2, 1])
     
@@ -116,21 +116,21 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS CON MEDIDAS CALIBRADAS ---
         can.setFont("Helvetica", 10)
         
-        # Nombre y DNI (0.745)[cite: 1, 2]
+        # Nombre y DNI (0.745)
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Empresa (0.715 con desplazamiento X en 0.38)[cite: 1, 2]
+        # Empresa (0.715 con desplazamiento X en 0.38)
         can.drawString(pdf_w * 0.38, pdf_h * 0.715, txt_empresa)
         
-        # Puesto (0.685 con desplazamiento X en 0.16)[cite: 1, 2]
+        # Puesto (0.685 con desplazamiento X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # Fecha en formato numérico (Eje Y en 0.47, con Día en 0.23, Mes en 0.31 y Año en 0.42)[cite: 1, 2]
+        # Fecha en formato numérico (Eje Y en 0.47, con Día en 0.23, Mes en 0.31 y Año en 0.42)
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
             dia = partes_fecha[0]
-            mes = partes_fecha[1]  # Mes numérico
+            mes = partes_fecha[1]  
             anio = partes_fecha[2]
         except:
             dia, mes, anio = txt_fecha, "", ""
@@ -140,7 +140,7 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.31, y_fecha, str(mes))    
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
         
-        # Lugar (Eje Y en 0.44, X en 0.23)[cite: 1, 2]
+        # Lugar (Eje Y en 0.44, X en 0.23)
         can.drawString(pdf_w * 0.23, pdf_h * 0.44, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
@@ -152,7 +152,8 @@ if pdf_file and firma_img and huella_img:
         r_sig_w = sig_w * scale_x
         
         r_hue_x = hue_x * scale_x
-        r_hue_y = pdf_h - (sig_y * scale_y) - r_hue_h
+        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h  # CORREGIDO: ahora usa hue_y
+        r_hue_w = hue_w * scale_x
         
         temp_sig_path = "temp_firma.png"
         temp_hue_path = "temp_huella.png"
@@ -160,7 +161,7 @@ if pdf_file and firma_img and huella_img:
         huella_img.save(temp_hue_path)
         
         can.drawImage(temp_sig_path, r_sig_x, r_sig_y, width=r_sig_w, preserveAspectRatio=True, mask='auto')
-        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=hue_w * scale_x, preserveAspectRatio=True, mask='auto')
+        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
         can.save()
         
         if os.path.exists(temp_sig_path): os.remove(temp_sig_path)
