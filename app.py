@@ -46,7 +46,7 @@ if huella_file:
 else:
     st.sidebar.warning("⚠️ Sube tu huella.")
 
-# Función para conectar con Gemini y detectar coordenadas visuales con el modelo estable
+# Función para conectar con Gemini usando el modelo correcto requerido por la API
 def detectar_coordenadas_con_ia(imagen_pil, api_key):
     if not api_key:
         return None
@@ -74,7 +74,7 @@ def detectar_coordenadas_con_ia(imagen_pil, api_key):
         }
         """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-3.8-flash',  # Modelo requerido por la API de Google
             contents=[imagen_pil, prompt]
         )
         texto_respuesta = response.text.strip()
