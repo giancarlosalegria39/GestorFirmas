@@ -46,47 +46,56 @@ if huella_file:
 else:
     st.sidebar.warning("⚠️ Sube tu huella.")
 
-# Función para conectar con Gemini usando el modelo correcto requerido por la API
+# Función con respaldo automático para evitar bloqueos por alta demanda
 def detectar_coordenadas_con_ia(imagen_pil, api_key):
     if not api_key:
         return None
-    try:
-        client = genai.Client(api_key=api_key)
-        prompt = """
-        Analiza visualmente este documento de trabajo o constancia.
-        Identifica la ubicación aproximada de los siguientes elementos en una escala normalizada de 0.0 a 1.0 (donde 0,0 es la esquina superior izquierda):
-        1. Nombre del trabajador y DNI.
-        2. Empresa.
-        3. Puesto.
-        4. Espacio para la Firma.
-        5. Espacio para la Huella Digital.
-        6. Lugar.
+    
+    client = genai.Client(api_key=api_key)
+    prompt = """
+    Analiza visualmente este documento de trabajo o constancia.
+    Identifica la ubicación aproximada de los siguientes elementos en una escala normalizada de 0.0 a 1.0 (donde 0,0 es la esquina superior izquierda):
+    1. Nombre del trabajador y DNI.
+    2. Empresa.
+    3. Puesto.
+    4. Espacio para la Firma.
+    5. Espacio para la Huella Digital.
+    6. Lugar.
 
-        Devuelve la respuesta EXCLUSIVAMENTE en un formato JSON válido (sin texto adicional ni bloques de Markdown como ```json) con las siguientes llaves exactas:
-        {
-          "nombre_x": 0.0, "nombre_y": 0.0,
-          "dni_x": 0.0, "dni_y": 0.0,
-          "empresa_x": 0.0, "empresa_y": 0.0,
-          "puesto_x": 0.0, "puesto_y": 0.0,
-          "firma_x": 0.0, "firma_y": 0.0,
-          "huella_x": 0.0, "huella_y": 0.0,
-          "lugar_x": 0.0, "lugar_y": 0.0
-        }
-        """
-        response = client.models.generate_content(
-            model='gemini-3.8-flash',  # Modelo requerido por la API de Google
-            contents=[imagen_pil, prompt]
-        )
-        texto_respuesta = response.text.strip()
-        if texto_respuesta.startswith("```json"):
-            texto_respuesta = texto_respuesta[7:-3].strip()
-        elif texto_respuesta.startswith("```"):
-            texto_respuesta = texto_respuesta[3:-3].strip()
+    Devuelve la respuesta EXCLUSIVAMENTE en un formato JSON válido (sin texto adicional ni bloques de Markdown como ```json) con las siguientes llaves exactas:
+    {
+      "nombre_x": 0.0, "nombre_y": 0.0,
+      "dni_x": 0.0, "dni_y": 0.0,
+      "empresa_x": 0.0, "empresa_y": 0.0,
+      "puesto_x": 0.0, "puesto_y": 0.0,
+      "firma_x": 0.0, "firma_y": 0.0,
+      "huella_x": 0.0, "huella_y": 0.0,
+      "lugar_x": 0.0, "lugar_y": 0.0
+    }
+    """
+    
+    # Lista de modelos para probar en secuencia si uno da error de tráfico o saturación
+    modelos_alternativos = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+    
+    for modelo in modelos_alternativos:
+        try:
+            response = client.models.generate_content(
+                model=modelo,
+                contents=[imagen_pil, prompt]
+            )
+            texto_respuesta = response.text.strip()
+            if texto_respuesta.startswith("```json"):
+                texto_respuesta = texto_respuesta[7:-3].strip()
+            elif texto_respuesta.startswith("```"):
+                texto_respuesta = texto_respuesta[3:-3].strip()
+                
+            return json.loads(texto_respuesta)
+        except Exception:
+            # Si falla un modelo por saturación (503) o no existe, salta al siguiente de la lista
+            continue
             
-        return json.loads(texto_respuesta)
-    except Exception as e:
-        st.error(f"Error al conectar con Gemini: {e}")
-        return None
+    st.error("Los servidores de IA están experimentando alta demanda en este momento. Por favor, espera unos segundos y vuelve a hacer clic en el botón.")
+    return None
 
 # Sección principal: Cargar PDF
 st.header("4. Sube el Documento a Rellenar y Firmar")
