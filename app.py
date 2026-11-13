@@ -3,27 +3,27 @@ from PIL import Image
 from pdf2image import convert_from_bytes
 from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
+import pdfplumber
 import io
 import os
 from datetime import datetime
 
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
-st.title("✍️ Aplicación de Firma, Huella y Llenado de Datos para PDFs")
-st.write("Completa tus datos, sube tu documento, y descarga tu constancia firmada y rellenada automáticamente.")
+st.title("✍️ Aplicación Inteligente de Firma y Llenado de PDFs")
+st.write("Sube tu documento y el sistema detectará automáticamente dónde rellenar, firmar y estampar la huella.")
 
-# Sección lateral: Cargar Credenciales y Datos Personales
+# Sección lateral: Cargar Credenciales
 st.sidebar.header("1. Tus Credenciales")
 firma_file = st.sidebar.file_uploader("Sube tu Firma (PNG transparente)", type=["png", "jpg", "jpeg"])
 huella_file = st.sidebar.file_uploader("Sube tu Huella Digital (PNG transparente)", type=["png", "jpg", "jpeg"])
 
-st.sidebar.header("2. Datos del Trabajador y Documento")
+st.sidebar.header("2. Datos del Trabajador")
 txt_nombre = st.sidebar.text_input("Nombre Completo", placeholder="Ej. Juan Pérez")
 txt_dni = st.sidebar.text_input("DNI", placeholder="Ej. 74859612")
 txt_empresa = st.sidebar.text_input("Empresa", value="HOMECENTERS PERUANOS S.A.")
 txt_puesto = st.sidebar.text_input("Puesto", placeholder="Ej. Asistente de Ventas")
 
-# Campos para Fecha y Lugar
 txt_fecha = st.sidebar.text_input("Fecha", value=datetime.now().strftime("%d/%m/%Y"), placeholder="Ej. 25/11/2026")
 txt_lugar = st.sidebar.text_input("Lugar", value="Lima", placeholder="Ej. Lima")
 
@@ -42,6 +42,17 @@ if huella_file:
 else:
     st.sidebar.warning("⚠️ Sube tu huella para continuar.")
 
+# Función para buscar coordenadas de palabras clave usando pdfplumber
+def buscar_coordenada_palabra(pdf_bytes, pagina_idx, palabra_clave):
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        page = pdf.pages[pagina_idx]
+        words = page.extract_words()
+        for word in words:
+            if palabra_clave.lower() in word['text'].lower():
+                # Retorna las coordenadas relativas (escala de 0 a 1)
+                return word['x0'] / page.width, word['top'] / page.height
+    return None
+
 # Sección principal: Cargar PDF
 st.header("3. Sube el Documento a Rellenar y Firmar")
 pdf_file = st.file_uploader("Sube el archivo PDF de la Constancia", type=["pdf"])
@@ -49,39 +60,40 @@ pdf_file = st.file_uploader("Sube el archivo PDF de la Constancia", type=["pdf"]
 if pdf_file and firma_img and huella_img:
     pdf_bytes = pdf_file.read()
     
-    # Convertir PDF a imágenes para previsualización
     try:
         images = convert_from_bytes(pdf_bytes)
     except Exception as e:
         st.error("Error al procesar el PDF con Poppler. Verifica la configuración de rutas.")
         st.stop()
         
-    st.subheader("4. Previsualización y Posicionamiento")
+    st.subheader("4. Previsualización y Posicionamiento Inteligente")
     pagina_seleccionada = st.selectbox("Selecciona la página a rellenar:", range(len(images)), format_func=lambda x: f"Página {x + 1}")
     
     current_image = images[pagina_seleccionada]
     img_width, img_height = current_image.size
     
-    # Casilla para activar el posicionamiento automático inteligente
-    auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
+    auto_detectar = st.checkbox("✨ Activar Detección Automática por Palabras Clave", value=True)
     
-    # Coordenadas calibradas
+    # --- INTENTO DE DETECCIÓN INTELIGENTE ---
+    pos_firma_x, pos_firma_y = 0.21, 0.70  # Valores por defecto (Promart)
+    
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  
-        val_sig_y = int(img_height * 0.70)  
-        val_sig_w = 254
-        
-        val_hue_x = int(img_width * 0.27)  
-        val_hue_y = int(img_height * 1.52)  
-        val_hue_w = 165
-    else:
-        val_sig_x = 385
-        val_sig_y = 1600
-        val_sig_w = 254
-        
-        val_hue_x = 450
-        val_hue_y = 3568
-        val_hue_w = 165
+        # Buscar la palabra 'Firma' o 'Huella' en el PDF para anclar los elementos
+        coord_firma = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Firma")
+        if coord_firma:
+            pos_firma_x, pos_firma_y = coord_firma[0], coord_firma[1] + 0.02
+            st.success(f"🔍 ¡Palabra 'Firma' detectada en el documento! Posicionamiento ajustado automáticamente.")
+        else:
+            st.info("ℹ️ No se encontró la palabra 'Firma' exacta, usando valores estándar de respaldo.")
+
+    # Asignar valores a los sliders (automáticos o manuales)
+    val_sig_x = int(img_width * pos_firma_x)  
+    val_sig_y = int(img_height * pos_firma_y)  
+    val_sig_w = 254
+    
+    val_hue_x = int(img_width * (pos_firma_x + 0.07))  # Al lado de la firma
+    val_hue_y = int(img_height * (pos_firma_y + 0.14)) # Debajo del texto de huella
+    val_hue_w = 165
 
     col1, col2 = st.columns([2, 1])
     
@@ -89,7 +101,7 @@ if pdf_file and firma_img and huella_img:
         st.image(current_image, caption=f"Página {pagina_seleccionada + 1}", use_container_width=True)
         
     with col2:
-        st.info("Ajusta los valores si es necesario o déjalo en automático.")
+        st.info("Puedes afinar la posición con los controles si es necesario.")
         
         st.write("**Firma:**")
         sig_x = st.slider("Posición X (Firma)", 0, img_width, val_sig_x, key="sig_x")
@@ -113,25 +125,16 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS CON MEDIDAS CALIBRADAS ---
+        # --- ESTAMPAR TEXTOS ---
         can.setFont("Helvetica", 10)
-        
-        # Nombre y DNI (0.745)
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
-        
-        # Empresa (0.715 con X en 0.38)
         can.drawString(pdf_w * 0.38, pdf_h * 0.715, txt_empresa)
-        
-        # Puesto (0.685 con X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # Fecha en formato numérico (Eje Y en 0.47, con Día en 0.23, Mes en 0.31 y Año en 0.42)
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
-            dia = partes_fecha[0]
-            mes = partes_fecha[1]  # Mes numérico
-            anio = partes_fecha[2]
+            dia, mes, anio = partes_fecha[0], partes_fecha[1], partes_fecha[2]
         except:
             dia, mes, anio = txt_fecha, "", ""
 
@@ -140,7 +143,6 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.31, y_fecha, str(mes))    
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
         
-        # Lugar (Eje Y en 0.44, X en 0.23)
         can.drawString(pdf_w * 0.23, pdf_h * 0.44, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
