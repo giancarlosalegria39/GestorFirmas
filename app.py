@@ -68,7 +68,7 @@ if pdf_file and firma_img and huella_img:
     # Coordenadas calibradas con la firma en Y: 0.72, X: 0.21
     if auto_detectar:
         val_sig_x = int(img_width * 0.21)  
-        val_sig_y = int(img_height * 0.72)  
+        val_sig_y = int(img_height * 0.74)  
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -141,7 +141,7 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
         
         # Lugar (Eje Y en 0.43, X en 0.23)
-        can.drawString(pdf_w * 0.23, pdf_h * 0.43, txt_lugar)
+        can.drawString(pdf_w * 0.23, pdf_h * 0.44, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
