@@ -126,9 +126,30 @@ if pdf_file and firma_img and huella_img:
         # Puesto (0.685 con desplazamiento X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # Fecha (0.580) y Lugar (0.550)
-        can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
-        can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
+        # --- DESGLOSE DE FECHA EN LA LÍNEA INFERIOR ---
+        # Intentamos separar el formato DD/MM/YYYY o DD-MM-YYYY
+        try:
+            partes_fecha = txt_fecha.replace("-", "/").split("/")
+            dia = partes_fecha[0]
+            mes_num = partes_fecha[1]
+            anio = partes_fecha[2]
+            
+            # Convertir número de mes a texto en español si es necesario (opcional)
+            meses = {"01": "enero", "02": "febrero", "03": "marzo", "04": "abril", "05": "mayo", "06": "junio", 
+                     "07": "julio", "08": "agosto", "09": "septiembre", "10": "octubre", "11": "noviembre", "12": "diciembre"}
+            mes = meses.get(mes_num, mes_num)
+        except:
+            dia, mes, anio = txt_fecha, "", ""
+
+        # Coordenada Y para la línea de la fecha (aprox. 0.385 de altura)
+        y_fecha = pdf_h * 0.385
+        
+        can.drawString(pdf_w * 0.23, y_fecha, str(dia))    # Espacio para el día
+        can.drawString(pdf_w * 0.31, y_fecha, str(mes))    # Espacio para el mes
+        can.drawString(pdf_w * 0.42, y_fecha, str(anio))   # Espacio para el año
+        
+        # Lugar (0.355 de altura, justo en la línea de "Lugar:")
+        can.drawString(pdf_w * 0.23, pdf_h * 0.355, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
