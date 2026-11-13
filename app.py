@@ -23,7 +23,7 @@ txt_dni = st.sidebar.text_input("DNI", placeholder="Ej. 74859612")
 txt_empresa = st.sidebar.text_input("Empresa", value="HOMECENTERS PERUANOS S.A.")
 txt_puesto = st.sidebar.text_input("Puesto", placeholder="Ej. Asistente de Ventas")
 
-# Nuevos campos para Fecha y Lugar
+# Campos para Fecha y Lugar
 txt_fecha = st.sidebar.text_input("Fecha", value=datetime.now().strftime("%d/%m/%Y"), placeholder="Ej. 25/11/2026")
 txt_lugar = st.sidebar.text_input("Lugar", value="Lima", placeholder="Ej. Lima")
 
@@ -65,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas con 0.70 fijo para la firma
+    # Coordenadas calibradas con 0.66 para subir la firma a su sitio exacto
     if auto_detectar:
         val_sig_x = int(img_width * 0.23)
-        val_sig_y = int(img_height * 0.70)  # Factor exacto 0.70 establecido
+        val_sig_y = int(img_height * 0.66)  # Factor ajustado a 0.66 para subir la firma
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -76,7 +76,7 @@ if pdf_file and firma_img and huella_img:
         val_hue_w = 165
     else:
         val_sig_x = 385
-        val_sig_y = 1600
+        val_sig_y = 1500
         val_sig_w = 254
         
         val_hue_x = 450
@@ -124,7 +124,7 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
         can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
         
-        # Línea 3: Fecha y Lugar (ajustados para las líneas inferiores del formato)
+        # Línea 3: Fecha y Lugar
         can.drawString(pdf_w * 0.22, pdf_h * 0.655, txt_fecha)
         can.drawString(pdf_w * 0.22, pdf_h * 0.620, txt_lugar)
         
