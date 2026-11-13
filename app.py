@@ -65,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas definitivas (Firma en 0.72)
+    # Coordenadas calibradas con la firma en X: 0.22, Y: 0.74
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  
-        val_sig_y = int(img_height * 0.72)  
+        val_sig_x = int(img_width * 0.22)  
+        val_sig_y = int(img_height * 0.74)  
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -126,16 +126,16 @@ if pdf_file and firma_img and huella_img:
         # Puesto (0.685 con desplazamiento X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # Fecha desglosada en Día, Mes y Año (En números)
+        # Fecha en formato numérico (Eje Y actualizado a 0.48)
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
             dia = partes_fecha[0]
-            mes = partes_fecha[1]  # Mes en número (ej. 11)
+            mes = partes_fecha[1]  # Mes numérico
             anio = partes_fecha[2]
         except:
             dia, mes, anio = txt_fecha, "", ""
 
-        y_fecha = pdf_h * 0.46
+        y_fecha = pdf_h * 0.48
         can.drawString(pdf_w * 0.23, y_fecha, str(dia))    
         can.drawString(pdf_w * 0.31, y_fecha, str(mes))    
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
