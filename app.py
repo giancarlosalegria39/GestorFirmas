@@ -65,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas con la firma en Y: 0.66, X: 0.22
+    # Coordenadas calibradas con la firma en Y: 0.70, X: 0.21
     if auto_detectar:
-        val_sig_x = int(img_width * 0.22)  
-        val_sig_y = int(img_height * 0.66)  
+        val_sig_x = int(img_width * 0.21)  
+        val_sig_y = int(img_height * 0.70)  
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -183,9 +183,4 @@ if pdf_file and firma_img and huella_img:
             label="📥 Descargar PDF Rellenado y Firmado",
             data=output_pdf_bytes,
             file_name="constancia_completa.pdf",
-            mime="application/pdf"
-        )
-elif not (firma_img and huella_img):
-    st.info("👈 Sube primero tu firma y huella digital en la barra lateral para comenzar.")
-else:
-    st.info("👆 Sube un documento PDF en la sección superior para continuar.")
+            mime="application
