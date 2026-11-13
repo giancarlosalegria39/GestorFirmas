@@ -116,9 +116,9 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS CON MEDIDAS CALIBRADAS ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (0.750)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.750, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.750, txt_dni)
+        # Línea 1: Nombre y DNI (0.740)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.740, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.740, txt_dni)
         
         # Línea 2: Empresa (0.715)
         can.drawString(pdf_w * 0.38, pdf_h * 0.715, txt_empresa)
