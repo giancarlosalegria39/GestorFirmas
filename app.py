@@ -183,4 +183,9 @@ if pdf_file and firma_img and huella_img:
             label="📥 Descargar PDF Rellenado y Firmado",
             data=output_pdf_bytes,
             file_name="constancia_completa.pdf",
-            mime="application
+            mime="application/pdf"
+        )
+elif not (firma_img and huella_img):
+    st.info("👈 Sube primero tu firma y huella digital en la barra lateral para comenzar.")
+else:
+    st.info("👆 Sube un documento PDF en la sección superior para continuar.")
