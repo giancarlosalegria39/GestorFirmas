@@ -116,13 +116,15 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (Perfectos)
+        # Línea 1: Nombre y DNI
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Línea 2: Empresa y Puesto (Empresa movida un poco más a la derecha: 0.38)
+        # Línea 2: Empresa (en la primera línea de empresa)
         can.drawString(pdf_w * 0.38, pdf_h * 0.710, txt_empresa)
-        can.drawString(pdf_w * 0.79, pdf_h * 0.710, txt_puesto)
+        
+        # Puesto (bajado a la línea inferior izquierda que estaba vacía)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.672, txt_puesto)
         
         # Línea 3: Fecha y Lugar
         can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
