@@ -126,30 +126,28 @@ if pdf_file and firma_img and huella_img:
         # Puesto (0.685 con desplazamiento X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # --- DESGLOSE DE FECHA EN LA LÍNEA INFERIOR ---
-        # Intentamos separar el formato DD/MM/YYYY o DD-MM-YYYY
+        # --- DESGLOSE DE FECHA SUBIDO A SU LÍNEA CORRECTA ---
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
             dia = partes_fecha[0]
             mes_num = partes_fecha[1]
             anio = partes_fecha[2]
             
-            # Convertir número de mes a texto en español si es necesario (opcional)
             meses = {"01": "enero", "02": "febrero", "03": "marzo", "04": "abril", "05": "mayo", "06": "junio", 
                      "07": "julio", "08": "agosto", "09": "septiembre", "10": "octubre", "11": "noviembre", "12": "diciembre"}
             mes = meses.get(mes_num, mes_num)
         except:
             dia, mes, anio = txt_fecha, "", ""
 
-        # Coordenada Y para la línea de la fecha (aprox. 0.385 de altura)
-        y_fecha = pdf_h * 0.385
+        # Subimos la fecha a la línea correcta (0.52)
+        y_fecha = pdf_h * 0.52
         
-        can.drawString(pdf_w * 0.23, y_fecha, str(dia))    # Espacio para el día
-        can.drawString(pdf_w * 0.31, y_fecha, str(mes))    # Espacio para el mes
-        can.drawString(pdf_w * 0.42, y_fecha, str(anio))   # Espacio para el año
+        can.drawString(pdf_w * 0.23, y_fecha, str(dia))    # Día
+        can.drawString(pdf_w * 0.31, y_fecha, str(mes))    # Mes
+        can.drawString(pdf_w * 0.42, y_fecha, str(anio))   # Año
         
-        # Lugar (0.355 de altura, justo en la línea de "Lugar:")
-        can.drawString(pdf_w * 0.23, pdf_h * 0.355, txt_lugar)
+        # Lugar subido a su línea correspondiente (0.49)
+        can.drawString(pdf_w * 0.23, pdf_h * 0.49, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
@@ -160,8 +158,7 @@ if pdf_file and firma_img and huella_img:
         r_sig_w = sig_w * scale_x
         
         r_hue_x = hue_x * scale_x
-        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h
-        r_hue_w = hue_w * scale_x
+        r_hue_y = pdf_h - (sig_y * scale_y) - r_hue_h # (Mantenemos la lógica de la firma que ya tienes calibrada)
         
         temp_sig_path = "temp_firma.png"
         temp_hue_path = "temp_huella.png"
@@ -169,7 +166,7 @@ if pdf_file and firma_img and huella_img:
         huella_img.save(temp_hue_path)
         
         can.drawImage(temp_sig_path, r_sig_x, r_sig_y, width=r_sig_w, preserveAspectRatio=True, mask='auto')
-        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=r_hue_w, preserveAspectRatio=True, mask='auto')
+        can.drawImage(temp_hue_path, r_hue_x, r_hue_y, width=hue_w * scale_x, preserveAspectRatio=True, mask='auto')
         can.save()
         
         if os.path.exists(temp_sig_path): os.remove(temp_sig_path)
