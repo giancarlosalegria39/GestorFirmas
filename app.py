@@ -12,7 +12,7 @@ from google import genai
 st.set_page_config(page_title="Gestor IA de Firmas y PDFs", layout="wide")
 
 st.title("🤖 Aplicación con IA para Detección de Campos en PDFs")
-st.write("Sube cualquier tipo de formato y la IA analizará visualmente el documento para ubicar los campos.")
+st.write("Sube cualquier tipo de formato y la IA analizará visualmente el documento para ubicar los campos con precisión.")
 
 # Sección lateral: Credenciales de IA y Archivos
 st.sidebar.header("1. Configuración de IA")
@@ -74,7 +74,7 @@ def detectar_coordenadas_con_ia(imagen_pil, api_key):
         }
         """
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-3.8-flash',
             contents=[imagen_pil, prompt]
         )
         texto_respuesta = response.text.strip()
