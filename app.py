@@ -113,18 +113,18 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS (CORREGIDOS Y ALINEADOS) ---
+        # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (Bajados a 0.745 para encajar perfectamente tras "Yo," y "con DNI")
+        # Línea 1: Nombre y DNI (Perfectos)
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Línea 2: Empresa y Puesto (Bajados a 0.710 para encajar sobre las líneas correspondientes)
-        can.drawString(pdf_w * 0.36, pdf_h * 0.710, txt_empresa)
+        # Línea 2: Empresa y Puesto (Empresa movida un poco más a la derecha: 0.38)
+        can.drawString(pdf_w * 0.38, pdf_h * 0.710, txt_empresa)
         can.drawString(pdf_w * 0.79, pdf_h * 0.710, txt_puesto)
         
-        # Línea 3: Fecha y Lugar (Bajados a la zona correcta sobre sus líneas previas a la firma)
+        # Línea 3: Fecha y Lugar
         can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
         can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
         
