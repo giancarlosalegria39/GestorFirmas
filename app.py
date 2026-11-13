@@ -113,20 +113,20 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS (SUBIDOS UN POCO MÁS ARRIBA) ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI (Sus valores exactos estables)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
+        # Línea 1: Nombre y DNI (Subidos ligeramente a 0.760)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.760, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.760, txt_dni)
         
-        # Línea 2: Empresa (Su valor exacto estable)
-        can.drawString(pdf_w * 0.38, pdf_h * 0.710, txt_empresa)
+        # Línea 2: Empresa (Subida ligeramente a 0.725)
+        can.drawString(pdf_w * 0.38, pdf_h * 0.725, txt_empresa)
         
-        # Puesto (Subido un poquito a 0.687 para que quede exactamente sobre su línea)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.687, txt_puesto)
+        # Puesto / Mercaderista (Subido ligeramente a 0.695)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.695, txt_puesto)
         
-        # Línea 3: Fecha y Lugar (Sus valores exactos estables)
+        # Línea 3: Fecha y Lugar
         can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
         can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
         
