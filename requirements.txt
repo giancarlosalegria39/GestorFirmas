@@ -1,7 +1,5 @@
 streamlit
-Pillow
-pdf2image
 pypdf
 reportlab
-pdfplumber
-google-genai
+pdf2image
+pillow
