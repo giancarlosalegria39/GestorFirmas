@@ -120,11 +120,11 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Línea 2: Empresa (en la primera línea de empresa)
+        # Línea 2: Empresa
         can.drawString(pdf_w * 0.38, pdf_h * 0.710, txt_empresa)
         
-        # Puesto (bajado a la línea inferior izquierda que estaba vacía)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.672, txt_puesto)
+        # Puesto (subido ligeramente a 0.680 para que quede exactamente sobre la línea)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.680, txt_puesto)
         
         # Línea 3: Fecha y Lugar
         can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
