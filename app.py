@@ -5,7 +5,6 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 import io
 import os
-from datetime import datetime
 
 st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
 
@@ -17,15 +16,11 @@ st.sidebar.header("1. Tus Credenciales")
 firma_file = st.sidebar.file_uploader("Sube tu Firma (PNG transparente)", type=["png", "jpg", "jpeg"])
 huella_file = st.sidebar.file_uploader("Sube tu Huella Digital (PNG transparente)", type=["png", "jpg", "jpeg"])
 
-st.sidebar.header("2. Datos del Trabajador y Documento")
+st.sidebar.header("2. Datos del Trabajador")
 txt_nombre = st.sidebar.text_input("Nombre Completo", placeholder="Ej. Juan Pérez")
 txt_dni = st.sidebar.text_input("DNI", placeholder="Ej. 74859612")
 txt_empresa = st.sidebar.text_input("Empresa", value="HOMECENTERS PERUANOS S.A.")
 txt_puesto = st.sidebar.text_input("Puesto", placeholder="Ej. Asistente de Ventas")
-
-# Campos para Fecha y Lugar
-txt_fecha = st.sidebar.text_input("Fecha", value=datetime.now().strftime("%d/%m/%Y"), placeholder="Ej. 25/11/2026")
-txt_lugar = st.sidebar.text_input("Lugar", value="Lima", placeholder="Ej. Lima")
 
 firma_img = None
 huella_img = None
@@ -67,21 +62,23 @@ if pdf_file and firma_img and huella_img:
     
     # Coordenadas calibradas
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  
+        val_sig_x = int(img_width * 0.23)
         val_sig_y = int(img_height * 0.70)  
         val_sig_w = 254
         
-        val_hue_x = int(img_width * 0.28)  
-        val_hue_y = int(img_height * 0.84)  # Posición corregida para el recuadro de huella
-        val_hue_w = 110
+        # Medidas solicitadas para la huella automática
+        val_hue_x = int(img_width * 0.27)  
+        val_hue_y = int(img_height * 1.52)  
+        val_hue_w = 165
     else:
-        val_sig_x = 350
-        val_sig_y = 1500
+        val_sig_x = 385
+        val_sig_y = 1600
         val_sig_w = 254
         
+        # Medidas solicitadas para la huella manual
         val_hue_x = 450
         val_hue_y = 3568
-        val_hue_w = 110
+        val_hue_w = 165
 
     col1, col2 = st.columns([2, 1])
     
@@ -113,35 +110,16 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS CON MEDIDAS CALIBRADAS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Nombre y DNI (0.745)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
+        # Línea 1: Nombre y DNI
+        can.drawString(pdf_w * 0.16, pdf_h * 0.771, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.771, txt_dni)
         
-        # Empresa (0.715 con desplazamiento X en 0.38)
-        can.drawString(pdf_w * 0.38, pdf_h * 0.715, txt_empresa)
-        
-        # Puesto (0.685 con desplazamiento X en 0.16)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
-        
-        # Fecha en formato numérico (Eje Y en 0.47, con Día en 0.23, Mes en 0.31 y Año en 0.42)
-        try:
-            partes_fecha = txt_fecha.replace("-", "/").split("/")
-            dia = partes_fecha[0]
-            mes = partes_fecha[1]  
-            anio = partes_fecha[2]
-        except:
-            dia, mes, anio = txt_fecha, "", ""
-
-        y_fecha = pdf_h * 0.47
-        can.drawString(pdf_w * 0.23, y_fecha, str(dia))    
-        can.drawString(pdf_w * 0.31, y_fecha, str(mes))    
-        can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
-        
-        # Lugar (Eje Y en 0.44, X en 0.23)
-        can.drawString(pdf_w * 0.23, pdf_h * 0.44, txt_lugar)
+        # Línea 2: Empresa y Puesto
+        can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
+        can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
@@ -152,7 +130,7 @@ if pdf_file and firma_img and huella_img:
         r_sig_w = sig_w * scale_x
         
         r_hue_x = hue_x * scale_x
-        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h  # CORREGIDO: ahora usa hue_y
+        r_hue_y = pdf_h - (hue_y * scale_y) - r_hue_h
         r_hue_w = hue_w * scale_x
         
         temp_sig_path = "temp_firma.png"
