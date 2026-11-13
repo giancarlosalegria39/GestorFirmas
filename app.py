@@ -126,7 +126,7 @@ if pdf_file and firma_img and huella_img:
         # Puesto (0.685 con desplazamiento X en 0.16)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # --- DESGLOSE DE FECHA SUBIDO A SU LÍNEA CORRECTA ---
+        # --- DESGLOSE DE FECHA BAJADO A SU LÍNEA CORRECTA ---
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
             dia = partes_fecha[0]
@@ -139,15 +139,15 @@ if pdf_file and firma_img and huella_img:
         except:
             dia, mes, anio = txt_fecha, "", ""
 
-        # Subimos la fecha a la línea correcta (0.52)
-        y_fecha = pdf_h * 0.52
+        # Bajamos la fecha a 0.46
+        y_fecha = pdf_h * 0.46
         
         can.drawString(pdf_w * 0.23, y_fecha, str(dia))    # Día
         can.drawString(pdf_w * 0.31, y_fecha, str(mes))    # Mes
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   # Año
         
-        # Lugar subido a su línea correspondiente (0.49)
-        can.drawString(pdf_w * 0.23, pdf_h * 0.49, txt_lugar)
+        # Lugar bajado a 0.43
+        can.drawString(pdf_w * 0.23, pdf_h * 0.43, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
@@ -158,7 +158,7 @@ if pdf_file and firma_img and huella_img:
         r_sig_w = sig_w * scale_x
         
         r_hue_x = hue_x * scale_x
-        r_hue_y = pdf_h - (sig_y * scale_y) - r_hue_h # (Mantenemos la lógica de la firma que ya tienes calibrada)
+        r_hue_y = pdf_h - (sig_y * scale_y) - r_hue_h
         
         temp_sig_path = "temp_firma.png"
         temp_hue_path = "temp_huella.png"
