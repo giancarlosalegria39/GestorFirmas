@@ -126,9 +126,9 @@ if pdf_file and firma_img and huella_img:
         # Puesto (0.685)
         can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
         
-        # Línea 3: Fecha y Lugar
-        can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
-        can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
+        # Línea 3: Fecha y Lugar (Bajados a la zona correcta inferior: 0.38 y 0.34)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.38, txt_fecha)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.34, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
