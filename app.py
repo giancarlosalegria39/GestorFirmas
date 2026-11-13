@@ -8,10 +8,10 @@ import io
 import os
 from datetime import datetime
 
-st.set_page_config(page_title="Gestor de Firmas y Huella para PDF", layout="wide")
+st.set_page_config(page_title="Gestor Inteligente de Firmas y PDFs", layout="wide")
 
-st.title("✍️ Aplicación Inteligente de Firma y Llenado de PDFs")
-st.write("Sube tu documento y el sistema detectará automáticamente dónde rellenar, firmar y estampar la huella.")
+st.title("✍️ Aplicación Inteligente de Firma, Huella y Llenado de PDFs")
+st.write("Sube cualquier variante de documento y el sistema detectará automáticamente las palabras clave para rellenar y firmar con precisión.")
 
 # Sección lateral: Cargar Credenciales
 st.sidebar.header("1. Tus Credenciales")
@@ -42,14 +42,13 @@ if huella_file:
 else:
     st.sidebar.warning("⚠️ Sube tu huella para continuar.")
 
-# Función para buscar coordenadas de palabras clave usando pdfplumber
+# Función para buscar coordenadas relativas de palabras clave en el PDF
 def buscar_coordenada_palabra(pdf_bytes, pagina_idx, palabra_clave):
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         page = pdf.pages[pagina_idx]
         words = page.extract_words()
         for word in words:
             if palabra_clave.lower() in word['text'].lower():
-                # Retorna las coordenadas relativas (escala de 0 a 1)
                 return word['x0'] / page.width, word['top'] / page.height
     return None
 
@@ -66,7 +65,7 @@ if pdf_file and firma_img and huella_img:
         st.error("Error al procesar el PDF con Poppler. Verifica la configuración de rutas.")
         st.stop()
         
-    st.subheader("4. Previsualización y Posicionamiento Inteligente")
+    st.subheader("4. Previsualización y Posicionamiento Inteligente por Anclaje")
     pagina_seleccionada = st.selectbox("Selecciona la página a rellenar:", range(len(images)), format_func=lambda x: f"Página {x + 1}")
     
     current_image = images[pagina_seleccionada]
@@ -74,25 +73,50 @@ if pdf_file and firma_img and huella_img:
     
     auto_detectar = st.checkbox("✨ Activar Detección Automática por Palabras Clave", value=True)
     
-    # --- INTENTO DE DETECCIÓN INTELIGENTE ---
-    pos_firma_x, pos_firma_y = 0.21, 0.70  # Valores por defecto (Promart)
+    # --- VALORES POR DEFECTO (RESPALDO) ---
+    pos_nombre_x, pos_nombre_y = 0.16, 0.745
+    pos_dni_x, pos_dni_y = 0.75, 0.745
+    pos_empresa_x, pos_empresa_y = 0.38, 0.715
+    pos_puesto_x, pos_puesto_y = 0.16, 0.685
+    pos_firma_x, pos_firma_y = 0.21, 0.70
+    pos_lugar_x, pos_lugar_y = 0.23, 0.44
     
     if auto_detectar:
-        # Buscar la palabra 'Firma' o 'Huella' en el PDF para anclar los elementos
-        coord_firma = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Firma")
-        if coord_firma:
-            pos_firma_x, pos_firma_y = coord_firma[0], coord_firma[1] + 0.02
-            st.success(f"🔍 ¡Palabra 'Firma' detectada en el documento! Posicionamiento ajustado automáticamente.")
-        else:
-            st.info("ℹ️ No se encontró la palabra 'Firma' exacta, usando valores estándar de respaldo.")
+        # Búsqueda dinámica de anclajes en el documento actual
+        c_yo = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Yo")
+        c_dni = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "DNI")
+        c_empresa = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "empresa")
+        c_puesto = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "puesto")
+        c_firma = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Firma")
+        c_lugar = buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Lima") or buscar_coordenada_palabra(pdf_bytes, pagina_seleccionada, "Lugar")
+        
+        if c_yo:
+            pos_nombre_x = c_yo[0] + 0.04
+            pos_nombre_y = c_yo[1]
+        if c_dni:
+            pos_dni_x = c_dni[0] + 0.08
+            pos_dni_y = c_dni[1]
+        if c_empresa:
+            pos_empresa_x = c_empresa[0] + 0.08
+            pos_empresa_y = c_empresa[1]
+        if c_puesto:
+            pos_puesto_x = c_puesto[0] + 0.04
+            pos_puesto_y = c_puesto[1]
+        if c_firma:
+            pos_firma_x = c_firma[0]
+            pos_firma_y = c_firma[1] + 0.02
+        if c_lugar:
+            pos_lugar_x = c_lugar[0]
+            pos_lugar_y = c_lugar[1]
+            
+        st.success("🔍 ¡Palabras clave detectadas y adaptadas automáticamente al nuevo documento!")
 
-    # Asignar valores a los sliders (automáticos o manuales)
     val_sig_x = int(img_width * pos_firma_x)  
     val_sig_y = int(img_height * pos_firma_y)  
     val_sig_w = 254
     
-    val_hue_x = int(img_width * (pos_firma_x + 0.07))  # Al lado de la firma
-    val_hue_y = int(img_height * (pos_firma_y + 0.14)) # Debajo del texto de huella
+    val_hue_x = int(img_width * 0.27)  
+    val_hue_y = int(img_height * 1.52)  
     val_hue_w = 165
 
     col1, col2 = st.columns([2, 1])
@@ -125,12 +149,13 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ---
+        # --- ESTAMPAR TEXTOS CON COORDENADAS DINÁMICAS ---
         can.setFont("Helvetica", 10)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
-        can.drawString(pdf_w * 0.38, pdf_h * 0.715, txt_empresa)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.685, txt_puesto)
+        
+        can.drawString(pdf_w * pos_nombre_x, pdf_h * (1 - pos_nombre_y), txt_nombre)
+        can.drawString(pdf_w * pos_dni_x, pdf_h * (1 - pos_dni_y), txt_dni)
+        can.drawString(pdf_w * pos_empresa_x, pdf_h * (1 - pos_empresa_y), txt_empresa)
+        can.drawString(pdf_w * pos_puesto_x, pdf_h * (1 - pos_puesto_y), txt_puesto)
         
         try:
             partes_fecha = txt_fecha.replace("-", "/").split("/")
@@ -143,7 +168,7 @@ if pdf_file and firma_img and huella_img:
         can.drawString(pdf_w * 0.31, y_fecha, str(mes))    
         can.drawString(pdf_w * 0.42, y_fecha, str(anio))   
         
-        can.drawString(pdf_w * 0.23, pdf_h * 0.44, txt_lugar)
+        can.drawString(pdf_w * pos_lugar_x, pdf_h * (1 - pos_lugar_y), txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
