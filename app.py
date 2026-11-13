@@ -65,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas definitivas
+    # Coordenadas calibradas definitivas (Firma en 0.66 y X en 0.21)
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  # Desplazamiento X optimizado a la izquierda
-        val_sig_y = int(img_height * 0.66)  # Medida exacta 0.66 sobre la línea de firma
+        val_sig_x = int(img_width * 0.21)  
+        val_sig_y = int(img_height * 0.66)  
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -116,17 +116,17 @@ if pdf_file and firma_img and huella_img:
         # --- ESTAMPAR TEXTOS ESCRITOS ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI
+        # Línea 1: Nombre y DNI (Sus valores exactos estables)
         can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
         can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Línea 2: Empresa
+        # Línea 2: Empresa (Su valor exacto estable)
         can.drawString(pdf_w * 0.38, pdf_h * 0.710, txt_empresa)
         
-        # Puesto (subido ligeramente a 0.680 para que quede exactamente sobre la línea)
-        can.drawString(pdf_w * 0.16, pdf_h * 0.680, txt_puesto)
+        # Puesto (Subido un poquito a 0.687 para que quede exactamente sobre su línea)
+        can.drawString(pdf_w * 0.16, pdf_h * 0.687, txt_puesto)
         
-        # Línea 3: Fecha y Lugar
+        # Línea 3: Fecha y Lugar (Sus valores exactos estables)
         can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
         can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
         
