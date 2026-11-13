@@ -65,10 +65,10 @@ if pdf_file and firma_img and huella_img:
     # Casilla para activar el posicionamiento automático inteligente
     auto_detectar = st.checkbox("✨ Aplicar Posicionamiento Automático (Formato Promart)", value=True)
     
-    # Coordenadas calibradas: X a la izquierda (0.21) y Y en su medida exacta (0.70)
+    # Coordenadas calibradas definitivas
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  # Ligeramente a la izquierda
-        val_sig_y = int(img_height * 0.70)  # Medida exacta 0.70 sobre la línea de firma
+        val_sig_x = int(img_width * 0.21)  # Desplazamiento X optimizado a la izquierda
+        val_sig_y = int(img_height * 0.66)  # Medida exacta 0.66 sobre la línea de firma
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
@@ -76,7 +76,7 @@ if pdf_file and firma_img and huella_img:
         val_hue_w = 165
     else:
         val_sig_x = 350
-        val_sig_y = 1600
+        val_sig_y = 1500
         val_sig_w = 254
         
         val_hue_x = 450
@@ -113,20 +113,20 @@ if pdf_file and firma_img and huella_img:
         scale_x = pdf_w / img_width
         scale_y = pdf_h / img_height
         
-        # --- ESTAMPAR TEXTOS ESCRITOS ---
+        # --- ESTAMPAR TEXTOS ESCRITOS (CORREGIDOS Y ALINEADOS) ---
         can.setFont("Helvetica", 10)
         
-        # Línea 1: Nombre y DNI
-        can.drawString(pdf_w * 0.16, pdf_h * 0.763, txt_nombre)
-        can.drawString(pdf_w * 0.75, pdf_h * 0.763, txt_dni)
+        # Línea 1: Nombre y DNI (Bajados a 0.745 para encajar perfectamente tras "Yo," y "con DNI")
+        can.drawString(pdf_w * 0.16, pdf_h * 0.745, txt_nombre)
+        can.drawString(pdf_w * 0.75, pdf_h * 0.745, txt_dni)
         
-        # Línea 2: Empresa y Puesto
-        can.drawString(pdf_w * 0.36, pdf_h * 0.728, txt_empresa)
-        can.drawString(pdf_w * 0.79, pdf_h * 0.728, txt_puesto)
+        # Línea 2: Empresa y Puesto (Bajados a 0.710 para encajar sobre las líneas correspondientes)
+        can.drawString(pdf_w * 0.36, pdf_h * 0.710, txt_empresa)
+        can.drawString(pdf_w * 0.79, pdf_h * 0.710, txt_puesto)
         
-        # Línea 3: Fecha y Lugar
-        can.drawString(pdf_w * 0.22, pdf_h * 0.655, txt_fecha)
-        can.drawString(pdf_w * 0.22, pdf_h * 0.620, txt_lugar)
+        # Línea 3: Fecha y Lugar (Bajados a la zona correcta sobre sus líneas previas a la firma)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.580, txt_fecha)
+        can.drawString(pdf_w * 0.22, pdf_h * 0.550, txt_lugar)
         
         # --- ESTAMPAR FIRMA Y HUELLA ---
         r_sig_h = sig_w * scale_x * (firma_img.height / firma_img.width)
