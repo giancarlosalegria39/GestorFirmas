@@ -1,5 +1,6 @@
 streamlit
+PIL
+pdf2image
 pypdf
 reportlab
-pdf2image
-pillow
+pdfplumber
