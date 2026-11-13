@@ -67,8 +67,8 @@ if pdf_file and firma_img and huella_img:
     
     # Coordenadas calibradas con la firma en Y: 0.72, X: 0.21
     if auto_detectar:
-        val_sig_x = int(img_width * 0.21)  
-        val_sig_y = int(img_height * 0.74)  
+        val_sig_x = int(img_width * 0.22)  
+        val_sig_y = int(img_height * 0.73)  
         val_sig_w = 254
         
         val_hue_x = int(img_width * 0.27)  
